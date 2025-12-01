@@ -1,0 +1,63 @@
+name: Web CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+# Даем права на запись для Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Настройка конкурентности (чтобы деплои не накладывались)
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      # Запуск линтера (если настроен, можно закомментировать, если ошибки)
+      - name: Run lint
+        run: npm run lint --if-present
+
+      # Сборка проекта (создает папку dist)
+      - name: Build project
+        run: npm run build
+
+      # Загрузка папки dist как артефакта для Pages
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  # Задача деплоя
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build # Ждет окончания сборки
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

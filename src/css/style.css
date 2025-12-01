@@ -1,0 +1,34 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(4, 120px);
+    grid-template-rows: repeat(4, 120px);
+    gap: 10px;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.cell {
+    background-color: #fff;
+    border-radius: 4px;
+    position: relative; /* Чтобы картинка позиционировалась внутри */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.goblin {
+    width: 80%;
+    height: auto;
+    pointer-events: none; /* Чтобы клики проходили сквозь картинку, если нужно */
+}
